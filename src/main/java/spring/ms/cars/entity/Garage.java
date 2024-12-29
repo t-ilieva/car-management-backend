@@ -2,6 +2,9 @@ package spring.ms.cars.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "garage")
 public class Garage {
@@ -13,6 +16,9 @@ public class Garage {
     private String location;
     private String city;
     private int capacity;
+
+    @ManyToMany(mappedBy = "garages")  // Мапва връзката, дефинирана в Car
+    private Set<Car> cars = new HashSet<>();
 
     public int getId() {
         return id;
@@ -52,5 +58,13 @@ public class Garage {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
+    }
+
+    public Set<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(Set<Car> cars) {
+        this.cars = cars;
     }
 }

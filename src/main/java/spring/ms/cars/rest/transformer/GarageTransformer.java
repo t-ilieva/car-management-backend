@@ -26,15 +26,4 @@ public class GarageTransformer {
 
         return garage;
     }
-
-    public static Garage toEntity(GarageResponse garageResponse){
-        Garage garage = new Garage();
-        garage.setId(garageResponse.getId());
-        garage.setName(garageResponse.getName());
-        garage.setLocation(garageResponse.getLocation());
-        garage.setCity(garageResponse.getCity());
-        garage.setCapacity(garageResponse.getCapacity());
-
-        return garage;
-    }
 }

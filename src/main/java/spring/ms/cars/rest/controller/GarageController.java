@@ -1,6 +1,5 @@
 package spring.ms.cars.rest.controller;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +21,15 @@ public class GarageController {
     }
 
     @GetMapping
-    public List<GarageResponse> getAllGarages(@RequestParam(required = false) String city) {
+    public  ResponseEntity<List<GarageResponse>> getAll(@RequestParam(required = false) String city) {
+        List<GarageResponse> garages;
         if (city != null && !city.isEmpty()) {
-            return garageService.getByCity(city);
+            garages = garageService.getByCity(city);
         } else {
-            return garageService.getAll();
+            garages = garageService.getAll();
         }
+
+        return ResponseEntity.ok(garages);
     }
 
     @GetMapping("/{id}")
@@ -41,12 +43,12 @@ public class GarageController {
     }
 
     @PostMapping
-    public void save(@RequestBody GarageRequest garageRequest) {
+    public void create(@RequestBody GarageRequest garageRequest) {
         int id = garageService.create(garageRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GarageResponse> updateGarage(
+    public ResponseEntity<GarageResponse> update(
             @PathVariable int id,
             @RequestBody GarageRequest garageRequest) {
         Optional<GarageResponse> existingGarage = garageService.getById(id);
@@ -61,11 +63,13 @@ public class GarageController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<GarageResponse> delete(@PathVariable("id") int id){
+        Optional<GarageResponse> existingGarage = garageService.getById(id);
+
+        if (existingGarage.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         garageService.delete(id);
-
-        return ResponseEntity.
-                noContent().
-                build();
+        return ResponseEntity.noContent().build();
     }
-
 }
