@@ -1,38 +1,14 @@
-package spring.ms.cars.entity;
+package spring.ms.cars.rest.request;
 
-import jakarta.persistence.*;
+import java.util.List;
 
-import java.util.HashSet;
-import java.util.Set;
-
-@Entity
-@Table(name = "car")
-public class Car {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+public class CarRequest {
 
     private String make;
     private String model;
     private int productionYear;
     private String licensePlate;
-
-    @ManyToMany
-    @JoinTable(
-            name = "cars_garages",
-            joinColumns = @JoinColumn(name = "car_id"),
-            inverseJoinColumns = @JoinColumn(name = "garage_id")
-    )
-    private Set<Garage> garages = new HashSet<>();
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    private List<Integer> garageIds;
 
     public String getMake() {
         return make;
@@ -66,11 +42,11 @@ public class Car {
         this.licensePlate = licensePlate;
     }
 
-    public Set<Garage> getGarages() {
-        return garages;
+    public List<Integer> getGarageIds() {
+        return garageIds;
     }
 
-    public void setGarages(Set<Garage> garages) {
-        this.garages = garages;
+    public void setGarageIds(List<Integer> garageIds) {
+        this.garageIds = garageIds;
     }
 }

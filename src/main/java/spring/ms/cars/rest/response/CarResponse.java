@@ -1,30 +1,15 @@
-package spring.ms.cars.entity;
+package spring.ms.cars.rest.response;
 
-import jakarta.persistence.*;
+import java.util.List;
 
-import java.util.HashSet;
-import java.util.Set;
+public class CarResponse {
 
-@Entity
-@Table(name = "car")
-public class Car {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-
     private String make;
     private String model;
     private int productionYear;
     private String licensePlate;
-
-    @ManyToMany
-    @JoinTable(
-            name = "cars_garages",
-            joinColumns = @JoinColumn(name = "car_id"),
-            inverseJoinColumns = @JoinColumn(name = "garage_id")
-    )
-    private Set<Garage> garages = new HashSet<>();
+    private List<GarageResponse> garages;
 
     public int getId() {
         return id;
@@ -66,11 +51,11 @@ public class Car {
         this.licensePlate = licensePlate;
     }
 
-    public Set<Garage> getGarages() {
+    public List<GarageResponse> getGarages() {
         return garages;
     }
 
-    public void setGarages(Set<Garage> garages) {
+    public void setGarages(List<GarageResponse> garages) {
         this.garages = garages;
     }
 }
