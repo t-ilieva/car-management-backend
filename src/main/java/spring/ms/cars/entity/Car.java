@@ -26,6 +26,9 @@ public class Car {
     )
     private Set<Garage> garages = new HashSet<>();
 
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
+    private Set<Maintenance> maintenances;
+
     public int getId() {
         return id;
     }
@@ -72,5 +75,13 @@ public class Car {
 
     public void setGarages(Set<Garage> garages) {
         this.garages = garages;
+    }
+
+    public Set<Maintenance> getMaintenances() {
+        return maintenances;
+    }
+
+    public void setMaintenances(Set<Maintenance> maintenances) {
+        this.maintenances = maintenances;
     }
 }

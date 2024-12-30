@@ -78,8 +78,7 @@ public class CarService {
         Car car = CarTransformer.toEntity(carRequest);
 
         Set<Garage> garages = garageRepository
-                .findAllById(carRequest
-                .getGarageIds())
+                .findAllById(carRequest.getGarageIds())
                 .stream()
                 .collect(Collectors.toSet());
 

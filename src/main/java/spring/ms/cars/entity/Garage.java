@@ -20,6 +20,9 @@ public class Garage {
     @ManyToMany(mappedBy = "garages")  // Мапва връзката, дефинирана в Car
     private Set<Car> cars = new HashSet<>();
 
+    @OneToMany(mappedBy = "garage", cascade = CascadeType.ALL)
+    private Set<Maintenance> maintenances;
+
     public int getId() {
         return id;
     }
@@ -66,5 +69,13 @@ public class Garage {
 
     public void setCars(Set<Car> cars) {
         this.cars = cars;
+    }
+
+    public Set<Maintenance> getMaintenances() {
+        return maintenances;
+    }
+
+    public void setMaintenances(Set<Maintenance> maintenances) {
+        this.maintenances = maintenances;
     }
 }

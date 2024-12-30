@@ -48,9 +48,7 @@ public class CarController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CarResponse> update(
-            @PathVariable int id,
-            @RequestBody CarRequest carRequest) {
+    public ResponseEntity<CarResponse> update(@PathVariable int id, @RequestBody CarRequest carRequest) {
         Optional<CarResponse> existingCar = carService.getById(id);
 
         if (existingCar.isEmpty()) {

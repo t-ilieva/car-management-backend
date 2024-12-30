@@ -48,9 +48,7 @@ public class GarageController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GarageResponse> update(
-            @PathVariable int id,
-            @RequestBody GarageRequest garageRequest) {
+    public ResponseEntity<GarageResponse> update(@PathVariable int id, @RequestBody GarageRequest garageRequest) {
         Optional<GarageResponse> existingGarage = garageService.getById(id);
 
         if (existingGarage.isEmpty()) {
