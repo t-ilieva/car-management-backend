@@ -90,6 +90,19 @@ public class MaintenanceService {
     }
 
     public int create(MaintenanceRequest maintenanceRequest) {
+        Integer garageId = maintenanceRequest.getGarageId();
+        Date scheduledDate = null;
+
+        try {
+            scheduledDate = DATE_TIME_FORMATTER.parse(maintenanceRequest.getScheduledDate());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (!isGarageAvailable(garageId, scheduledDate)) {
+            throw new RuntimeException("No available capacity in the garage for the selected date.");
+        }
+
         Maintenance maintenance = MaintenanceTransformer.toEntity(maintenanceRequest);
 
         Garage garage = garageRepository.findById(maintenanceRequest.getGarageId())
@@ -106,6 +119,19 @@ public class MaintenanceService {
     }
 
     public void update(int id, MaintenanceRequest maintenanceRequest){
+        Integer garageId = maintenanceRequest.getGarageId();
+        Date scheduledDate = null;
+
+        try {
+            scheduledDate = DATE_TIME_FORMATTER.parse(maintenanceRequest.getScheduledDate());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (!isGarageAvailable(garageId, scheduledDate)) {
+            throw new RuntimeException("No available capacity in the garage for the selected date.");
+        }
+
         Maintenance maintenance = MaintenanceTransformer.toEntity(maintenanceRequest);
         maintenance.setId(id);
 
@@ -120,6 +146,17 @@ public class MaintenanceService {
         maintenance.setCar(car);
 
         maintenanceRepository.save(maintenance);
+    }
+
+    public boolean isGarageAvailable(Integer garageId, Date scheduledDate) {
+        List<Maintenance> maintenances = maintenanceRepository.findAllScheduledForGarageOnDate(garageId, scheduledDate);
+
+        int garageCapacity = garageRepository.findById(garageId)
+                .map(Garage::getCapacity)
+                .orElseThrow(() -> new RuntimeException("Garage with ID " + garageId + " not found"));
+
+
+        return maintenances.size() < garageCapacity;
     }
 
     public void delete(int id){
@@ -196,13 +233,12 @@ public class MaintenanceService {
 
     // Генериране на справката за брой на заявките по дати и свободен капацитет
     public List<GarageDailyAvailabilityReportDTO> generateDailyAvailabilityReport(Integer garageId, String startDateStr, String endDateStr) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = null;
         Date endDate = null;
 
         try {
-            startDate = sdf.parse(startDateStr);
-            endDate = sdf.parse(endDateStr);
+            startDate = DATE_TIME_FORMATTER.parse(startDateStr);
+            endDate = DATE_TIME_FORMATTER.parse(endDateStr);
         } catch (ParseException e) {
             throw new RuntimeException("Invalid date format", e);
         }
@@ -211,7 +247,7 @@ public class MaintenanceService {
 
         Map<String, Integer> requestCountPerDate = new HashMap<>();
         for (Maintenance maintenance : maintenances) {
-            String date = sdf.format(maintenance.getScheduledDate());
+            String date = DATE_TIME_FORMATTER.format(maintenance.getScheduledDate());
             requestCountPerDate.put(date, requestCountPerDate.getOrDefault(date, 0) + 1);
         }
 
@@ -220,7 +256,7 @@ public class MaintenanceService {
         currentDate.setTime(startDate);
 
         while (!currentDate.getTime().after(endDate)) {
-            String dateStr = sdf.format(currentDate.getTime());
+            String dateStr = DATE_TIME_FORMATTER.format(currentDate.getTime());
             int requestCount = requestCountPerDate.getOrDefault(dateStr, 0);
             int availableCapacity = garageRepository.findById(garageId)
                     .map(Garage::getCapacity)

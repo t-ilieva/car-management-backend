@@ -10,6 +10,13 @@ import java.util.List;
 
 public interface MaintenanceRepository extends JpaRepository<Maintenance, Integer> {
 
+    @Query("SELECT m FROM Maintenance m " +
+            "WHERE m.garage.id = :garageId " +
+            "AND m.scheduledDate = :scheduledDate")
+    List<Maintenance> findAllScheduledForGarageOnDate(@Param("garageId") Integer garageId,
+                                                      @Param("scheduledDate") Date scheduledDate);
+
+
     @Query("SELECT m.scheduledDate FROM Maintenance m " +
             "WHERE m.garage.id = :garageId " +
             "AND m.scheduledDate BETWEEN :startDate AND :endDate")
