@@ -4,8 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spring.ms.cars.rest.request.GarageRequest;
+import spring.ms.cars.rest.response.GarageDailyAvailabilityReportDTO;
 import spring.ms.cars.rest.response.GarageResponse;
 import spring.ms.cars.services.GarageService;
+import spring.ms.cars.services.MaintenanceService;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +17,21 @@ import java.util.Optional;
 public class GarageController {
 
     private final GarageService garageService;
+    private final MaintenanceService maintenanceService;
 
-    public GarageController(GarageService garageService) {
+    public GarageController(GarageService garageService, MaintenanceService maintenanceService) {
         this.garageService = garageService;
+        this.maintenanceService = maintenanceService;
+    }
+
+    @GetMapping("/dailyAvailabilityReport")
+    public ResponseEntity<List<GarageDailyAvailabilityReportDTO>> getDailyAvailabilityReport(
+            @RequestParam Integer garageId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        List<GarageDailyAvailabilityReportDTO> report = maintenanceService.generateDailyAvailabilityReport(garageId, startDate, endDate);
+        return ResponseEntity.ok(report);
     }
 
     @GetMapping

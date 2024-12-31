@@ -8,6 +8,7 @@ import spring.ms.cars.repository.CarRepository;
 import spring.ms.cars.repository.GarageRepository;
 import spring.ms.cars.repository.MaintenanceRepository;
 import spring.ms.cars.rest.request.MaintenanceRequest;
+import spring.ms.cars.rest.response.GarageDailyAvailabilityReportDTO;
 import spring.ms.cars.rest.response.MaintenanceResponse;
 import spring.ms.cars.rest.response.MonthlyRequestsReportDTO;
 import spring.ms.cars.rest.transformer.MaintenanceTransformer;
@@ -125,7 +126,7 @@ public class MaintenanceService {
         maintenanceRepository.deleteById(id);
     }
 
-    // Метод за генериране на справката за заявките по месеци
+    // Генериране на справката за заявките по месеци
     public List<MonthlyRequestsReportDTO> generateMonthlyReport(Integer garageId, String startDateStr, String endDateStr) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -186,10 +187,50 @@ public class MaintenanceService {
         endCalendar.setTime(endDate);
 
         while (startCalendar.before(endCalendar) || startCalendar.equals(endCalendar)) {
-            months.add(sdf.format(startCalendar.getTime()));  // Записваме година-месец
-            startCalendar.add(Calendar.MONTH, 1);  // Преминаваме към следващия месец
+            months.add(sdf.format(startCalendar.getTime()));
+            startCalendar.add(Calendar.MONTH, 1);
         }
 
         return months;
+    }
+
+    // Генериране на справката за брой на заявките по дати и свободен капацитет
+    public List<GarageDailyAvailabilityReportDTO> generateDailyAvailabilityReport(Integer garageId, String startDateStr, String endDateStr) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = null;
+        Date endDate = null;
+
+        try {
+            startDate = sdf.parse(startDateStr);
+            endDate = sdf.parse(endDateStr);
+        } catch (ParseException e) {
+            throw new RuntimeException("Invalid date format", e);
+        }
+
+        List<Maintenance> maintenances = maintenanceRepository.findAllScheduledForGarage(garageId, startDate, endDate);
+
+        Map<String, Integer> requestCountPerDate = new HashMap<>();
+        for (Maintenance maintenance : maintenances) {
+            String date = sdf.format(maintenance.getScheduledDate());
+            requestCountPerDate.put(date, requestCountPerDate.getOrDefault(date, 0) + 1);
+        }
+
+        List<GarageDailyAvailabilityReportDTO> report = new ArrayList<>();
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.setTime(startDate);
+
+        while (!currentDate.getTime().after(endDate)) {
+            String dateStr = sdf.format(currentDate.getTime());
+            int requestCount = requestCountPerDate.getOrDefault(dateStr, 0);
+            int availableCapacity = garageRepository.findById(garageId)
+                    .map(Garage::getCapacity)
+                    .orElse(0) - requestCount;
+
+            report.add(new GarageDailyAvailabilityReportDTO(dateStr, requestCount, availableCapacity));
+
+            currentDate.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        return report;
     }
 }
