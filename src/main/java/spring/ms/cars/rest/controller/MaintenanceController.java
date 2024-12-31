@@ -1,5 +1,7 @@
 package spring.ms.cars.rest.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.Optional;
 @RequestMapping("/maintenance")
 public class MaintenanceController {
 
+    @Autowired
     private final MaintenanceService maintenanceService;
 
     public MaintenanceController(MaintenanceService maintenanceService) {
@@ -52,12 +55,15 @@ public class MaintenanceController {
     }
 
     @PostMapping
-    public int create(@RequestBody MaintenanceRequest maintenanceRequest) {
-        return maintenanceService.create(maintenanceRequest);
+    public ResponseEntity<String> create(@Valid @RequestBody MaintenanceRequest maintenanceRequest) {
+        int createdId = maintenanceService.create(maintenanceRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Maintenance created with ID " + createdId);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MaintenanceResponse> update(@PathVariable int id, @RequestBody MaintenanceRequest maintenanceRequest) {
+    public ResponseEntity<MaintenanceResponse> update(@PathVariable int id, @Valid @RequestBody MaintenanceRequest maintenanceRequest) {
         Optional<MaintenanceResponse> existingMaintenance = maintenanceService.getById(id);
 
         if (existingMaintenance.isEmpty()) {

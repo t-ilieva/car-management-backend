@@ -1,5 +1,7 @@
 package spring.ms.cars.rest.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("/cars")
 public class CarController {
 
+    @Autowired
     private final CarService carService;
 
     public CarController(CarService carService) {
@@ -43,12 +46,15 @@ public class CarController {
     }
 
     @PostMapping
-    public int create(@RequestBody CarRequest carRequest) {
-        return carService.create(carRequest);
+    public ResponseEntity<String> create(@Valid @RequestBody CarRequest carRequest) {
+        int createdId = carService.create(carRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Car created with ID " + createdId);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CarResponse> update(@PathVariable int id, @RequestBody CarRequest carRequest) {
+    public ResponseEntity<CarResponse> update(@PathVariable int id, @Valid @RequestBody CarRequest carRequest) {
         Optional<CarResponse> existingCar = carService.getById(id);
 
         if (existingCar.isEmpty()) {

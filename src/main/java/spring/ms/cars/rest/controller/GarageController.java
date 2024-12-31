@@ -1,5 +1,7 @@
 package spring.ms.cars.rest.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import java.util.Optional;
 @RequestMapping("/garages")
 public class GarageController {
 
+    @Autowired
     private final GarageService garageService;
     private final MaintenanceService maintenanceService;
 
@@ -57,12 +60,15 @@ public class GarageController {
     }
 
     @PostMapping
-    public void create(@RequestBody GarageRequest garageRequest) {
-        int id = garageService.create(garageRequest);
+    public ResponseEntity<String> create(@Valid @RequestBody GarageRequest garageRequest) {
+        int createdId = garageService.create(garageRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Garage created with ID " + createdId);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GarageResponse> update(@PathVariable int id, @RequestBody GarageRequest garageRequest) {
+    public ResponseEntity<GarageResponse> update(@PathVariable int id, @Valid @RequestBody GarageRequest garageRequest) {
         Optional<GarageResponse> existingGarage = garageService.getById(id);
 
         if (existingGarage.isEmpty()) {

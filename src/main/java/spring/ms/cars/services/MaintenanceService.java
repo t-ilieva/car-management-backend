@@ -96,7 +96,7 @@ public class MaintenanceService {
         try {
             scheduledDate = DATE_TIME_FORMATTER.parse(maintenanceRequest.getScheduledDate());
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Invalid date format: " + maintenanceRequest.getScheduledDate());
         }
 
         if (!isGarageAvailable(garageId, scheduledDate)) {

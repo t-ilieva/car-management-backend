@@ -1,10 +1,20 @@
 package spring.ms.cars.rest.request;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 public class GarageRequest {
 
+    @NotBlank(message = "Garage name is required")
     private String name;
+
+    @NotBlank(message = "Location is required")
     private String location;
+
+    @NotBlank(message = "City is required")
     private String city;
+
+    @Min(value = 1, message = "Garage capacity must be at least 1")
     private int capacity;
 
     public String getName() {
