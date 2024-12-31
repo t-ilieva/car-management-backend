@@ -155,7 +155,6 @@ public class MaintenanceService {
                 .map(Garage::getCapacity)
                 .orElseThrow(() -> new RuntimeException("Garage with ID " + garageId + " not found"));
 
-
         return maintenances.size() < garageCapacity;
     }
 
@@ -266,7 +265,6 @@ public class MaintenanceService {
 
             currentDate.add(Calendar.DAY_OF_MONTH, 1);
         }
-
         return report;
     }
 }
