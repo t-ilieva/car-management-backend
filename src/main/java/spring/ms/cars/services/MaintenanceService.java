@@ -9,13 +9,12 @@ import spring.ms.cars.repository.GarageRepository;
 import spring.ms.cars.repository.MaintenanceRepository;
 import spring.ms.cars.rest.request.MaintenanceRequest;
 import spring.ms.cars.rest.response.MaintenanceResponse;
+import spring.ms.cars.rest.response.MonthlyRequestsReportDTO;
 import spring.ms.cars.rest.transformer.MaintenanceTransformer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -124,5 +123,73 @@ public class MaintenanceService {
 
     public void delete(int id){
         maintenanceRepository.deleteById(id);
+    }
+
+    // Метод за генериране на справката за заявките по месеци
+    public List<MonthlyRequestsReportDTO> generateMonthlyReport(Integer garageId, String startDateStr, String endDateStr) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        Date startDate = null;
+        try {
+            startDate = sdf.parse(startDateStr);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+            calendar.set(Calendar.DAY_OF_MONTH, 1); // първи ден на месеца
+            startDate = calendar.getTime();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        Date endDate = null;
+        try {
+            endDate = sdf.parse(endDateStr);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(endDate);
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH)); // последен ден на месеца
+            endDate = calendar.getTime();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<Date> scheduledDates = maintenanceRepository.findAllScheduledDates(garageId, startDate, endDate);
+
+        List<String> allMonths = generateAllMonths(startDate, endDate);
+
+        Map<String, Integer> monthRequestCount = new HashMap<>();
+
+        for (Date date : scheduledDates) {
+            String yearMonth = sdf.format(date);
+            System.out.println("Formatted Year-Month: " + yearMonth);
+            monthRequestCount.put(yearMonth, monthRequestCount.getOrDefault(yearMonth, 0) + 1);
+        }
+
+//        System.out.println("Month Request Count:");
+//        for (Map.Entry<String, Integer> entry : monthRequestCount.entrySet()) {
+//            System.out.println("Month: " + entry.getKey() + ", Requests: " + entry.getValue());
+//        }
+
+        List<MonthlyRequestsReportDTO> finalReport = new ArrayList<>();
+        for (String month : allMonths) {
+            Integer requestCount = monthRequestCount.getOrDefault(month, 0);
+            finalReport.add(new MonthlyRequestsReportDTO(month, requestCount));
+        }
+
+        return finalReport;
+    }
+
+    private List<String> generateAllMonths(Date startDate, Date endDate) {
+        List<String> months = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+
+        while (startCalendar.before(endCalendar) || startCalendar.equals(endCalendar)) {
+            months.add(sdf.format(startCalendar.getTime()));  // Записваме година-месец
+            startCalendar.add(Calendar.MONTH, 1);  // Преминаваме към следващия месец
+        }
+
+        return months;
     }
 }

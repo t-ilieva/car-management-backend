@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spring.ms.cars.rest.request.MaintenanceRequest;
 import spring.ms.cars.rest.response.MaintenanceResponse;
+import spring.ms.cars.rest.response.MonthlyRequestsReportDTO;
 import spring.ms.cars.services.MaintenanceService;
 
 import java.util.List;
@@ -18,6 +19,15 @@ public class MaintenanceController {
 
     public MaintenanceController(MaintenanceService maintenanceService) {
         this.maintenanceService = maintenanceService;
+    }
+
+    @GetMapping("/monthlyRequestsReport")
+    public ResponseEntity<List<MonthlyRequestsReportDTO>> getMonthlyRequestsReport(@RequestParam(required = false) Integer garageId,
+                                                                                   @RequestParam String startMonth,
+                                                                                   @RequestParam String endMonth) {
+
+        List<MonthlyRequestsReportDTO> report = maintenanceService.generateMonthlyReport(garageId, startMonth, endMonth);
+        return ResponseEntity.ok(report);
     }
 
     @GetMapping
